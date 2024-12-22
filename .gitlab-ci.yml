@@ -1,14 +1,15 @@
 stages:
   - build
+  - deploy
 
-variables:
-  CONTAINER_TEST_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
-  DOCKER_TLS_CERTDIR: "/certs"
-  DOCKER_IMAGE_NAME: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+#variables:
+#  DOCKER_TLS_CERTDIR: "/certs"
 
 build:
   stage: build
   image: docker:20.10.16
+  variables:
+    DOCKER_IMAGE_NAME: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
   services:
     - docker:20.10.16-dind
   before_script:
@@ -18,7 +19,22 @@ build:
     - docker push $DOCKER_IMAGE_NAME
     - docker tag $DOCKER_IMAGE_NAME $CI_REGISTRY_IMAGE:latest
     - docker push $CI_REGISTRY_IMAGE:latest
+  only:
+    - main
+
+deploy:
+  stage: deploy
+  needs:
+    - job: build
+  variables:
+    DOCKER_LATEST_IMAGE_NAME: $CI_REGISTRY_IMAGE:latest
+  before_script:
+    - echo "$TOKEN_PWD" | docker login $CI_REGISTRY -u $TOKEN_USER --password-stdin
+  script:
+    - docker pull $DOCKER_LATEST_IMAGE_NAME
   after_script:
     - docker logout
+  tags:
+    - winos
   only:
     - main
