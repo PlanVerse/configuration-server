@@ -15,8 +15,4 @@ COPY --from=builder build/libs/*.jar app.jar
 
 EXPOSE 50050
 
-ARG CLOUD_ENC_PWD
-
-ENV JASYPT_ENCRYPTOR_PASSWORD=${CLOUD_ENC_PWD}
-
-ENTRYPOINT ["java", "-Djasypt.encryptor.password=${JASYPT_ENCRYPTOR_PASSWORD}", "-jar","app.jar"]
+ENTRYPOINT ["java", "-Djasypt.encryptor.password=${CLOUD_ENC_PWD}", "-jar","app.jar"]

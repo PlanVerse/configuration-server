@@ -1,9 +1,12 @@
+default:
+  before_script:
+    - echo "$TOKEN_PWD" | docker login $CI_REGISTRY -u $TOKEN_USER --password-stdin
+  after_script:
+    - docker logout
+
 stages:
   - build
   - deploy
-
-#variables:
-#  DOCKER_TLS_CERTDIR: "/certs"
 
 build:
   stage: build
@@ -12,10 +15,8 @@ build:
     DOCKER_IMAGE_NAME: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
   services:
     - docker:20.10.16-dind
-  before_script:
-    - echo "$TOKEN_PWD" | docker login $CI_REGISTRY -u $TOKEN_USER --password-stdin
   script:
-    - docker build --pull --build-arg CLOUD_ENC_PWD=${CLOUD_ENC_PWD} -t $DOCKER_IMAGE_NAME .
+    - docker build --pull -t $DOCKER_IMAGE_NAME .
     - docker push $DOCKER_IMAGE_NAME
     - docker tag $DOCKER_IMAGE_NAME $CI_REGISTRY_IMAGE:latest
     - docker push $CI_REGISTRY_IMAGE:latest
@@ -28,12 +29,12 @@ deploy:
     - job: build
   variables:
     DOCKER_LATEST_IMAGE_NAME: $CI_REGISTRY_IMAGE:latest
-  before_script:
-    - echo "$TOKEN_PWD" | docker login $CI_REGISTRY -u $TOKEN_USER --password-stdin
+    DOCKER_TAG_NAME: $CI_PROJECT_NAME:latest
   script:
+    - docker rmi $DOCKER_LATEST_IMAGE_NAME;echo $?
     - docker pull $DOCKER_LATEST_IMAGE_NAME
-  after_script:
-    - docker logout
+    - docker tag $DOCKER_LATEST_IMAGE_NAME $DOCKER_TAG_NAME
+    - docker run -d -p 50050:50050 --rm -e CLOUD_ENC_PWD=$CLOUD_ENC_PWD --restart always --name $CI_PROJECT_NAME $DOCKER_TAG_NAME
   tags:
     - winos
   only:
