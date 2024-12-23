@@ -29,7 +29,7 @@ deploy:
     DOCKER_LATEST_IMAGE_NAME: $CI_REGISTRY_IMAGE:latest
     DOCKER_TAG_NAME: $CI_PROJECT_NAME:latest
   before_script:
-    - echo "$TOKEN_PWD" | docker login $CI_REGISTRY -u $TOKEN_USER --password-stdin
+    - docker login $CI_REGISTRY -u $TOKEN_USER --password $TOKEN_PWD
   script:
     - docker rmi $DOCKER_LATEST_IMAGE_NAME;echo $?
     - docker pull $DOCKER_LATEST_IMAGE_NAME
