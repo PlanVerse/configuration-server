@@ -1,25 +1,23 @@
-default:
-  before_script:
-    - echo "$TOKEN_PWD" | docker login $CI_REGISTRY -u $TOKEN_USER --password-stdin
-  after_script:
-    - docker logout
+image: gradle:7.6.0-jdk17
+
+variables:
+  GRADLE_USER_HOME: $CI_PROJECT_DIR/.gradle
+  JIB_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
 
 stages:
   - build
   - deploy
 
+cache:
+  key: $CI_COMMIT_REF_SLUG
+  paths:
+    - .gradle/wrapper/
+    - .gradle/caches/
+
 build:
   stage: build
-  image: docker:20.10.16
-  variables:
-    DOCKER_IMAGE_NAME: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
-  services:
-    - docker:20.10.16-dind
   script:
-    - docker build --pull -t $DOCKER_IMAGE_NAME .
-    - docker push $DOCKER_IMAGE_NAME
-    - docker tag $DOCKER_IMAGE_NAME $CI_REGISTRY_IMAGE:latest
-    - docker push $CI_REGISTRY_IMAGE:latest
+    - ./gradlew clean jib
   only:
     - main
 
@@ -30,11 +28,16 @@ deploy:
   variables:
     DOCKER_LATEST_IMAGE_NAME: $CI_REGISTRY_IMAGE:latest
     DOCKER_TAG_NAME: $CI_PROJECT_NAME:latest
+  before_script:
+    - echo "$TOKEN_PWD" | docker login $CI_REGISTRY -u $TOKEN_USER --password-stdin
   script:
     - docker rmi $DOCKER_LATEST_IMAGE_NAME;echo $?
+    - docker stop $CI_PROJECT_NAME;echo $?
     - docker pull $DOCKER_LATEST_IMAGE_NAME
     - docker tag $DOCKER_LATEST_IMAGE_NAME $DOCKER_TAG_NAME
-    - docker run -d -p 50050:50050 --rm -e CLOUD_ENC_PWD=$CLOUD_ENC_PWD --restart always --name $CI_PROJECT_NAME $DOCKER_TAG_NAME
+    - docker run -d -p 50050:50050 --rm --name $CI_PROJECT_NAME $DOCKER_TAG_NAME
+  after_script:
+    - docker logout
   tags:
     - winos
   only:

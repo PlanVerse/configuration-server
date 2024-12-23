@@ -6,6 +6,8 @@ plugins {
 
     id("org.springframework.boot") version "3.4.0"
     id("io.spring.dependency-management") version "1.1.6"
+
+    id("com.google.cloud.tools.jib") version "3.4.4"
 }
 
 group = "com.planverse"
@@ -47,4 +49,24 @@ kotlin {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+jib {
+    from {
+        image = "amazoncorretto:17"
+    }
+    to {
+        image = System.getenv("JIB_IMAGE")
+        tags = setOf("latest")
+        auth {
+            username = System.getenv("TOKEN_USER")
+            password = System.getenv("TOKEN_PWD")
+        }
+    }
+    container {
+        jvmFlags = listOf(
+            "-Djasypt.encryptor.password=${System.getenv("CLOUD_ENC_PWD")}",
+        )
+        ports = listOf("50050")
+    }
 }
