@@ -1,3 +1,6 @@
+before_script:
+  - CHCP 65001
+
 image: gradle:7.6.0-jdk17
 
 variables:
