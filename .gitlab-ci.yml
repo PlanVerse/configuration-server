@@ -32,9 +32,9 @@ deploy:
     - echo "$TOKEN_PWD" | docker login $CI_REGISTRY -u $TOKEN_USER --password-stdin
   script:
     - docker rmi $DOCKER_LATEST_IMAGE_NAME;echo $?
-    - docker stop $CI_PROJECT_NAME;echo $?
     - docker pull $DOCKER_LATEST_IMAGE_NAME
     - docker tag $DOCKER_LATEST_IMAGE_NAME $DOCKER_TAG_NAME
+    - docker stop $CI_PROJECT_NAME;echo $?
     - docker run -d -p 50050:50050 --rm --name $CI_PROJECT_NAME $DOCKER_TAG_NAME
   after_script:
     - docker logout
