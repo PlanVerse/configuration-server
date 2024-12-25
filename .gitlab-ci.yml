@@ -35,7 +35,7 @@ deploy:
     - docker pull $DOCKER_LATEST_IMAGE_NAME
     - docker tag $DOCKER_LATEST_IMAGE_NAME $DOCKER_TAG_NAME
     - docker stop $CI_PROJECT_NAME;echo $?
-    - docker run -d -p 50050:50050 --rm --name $CI_PROJECT_NAME $DOCKER_TAG_NAME
+    - docker run -d -p 50050:50050 -e JASYPT_ENCRYPTOR_PASSWORD=$CLOUD_ENC_PWD --rm --name $CI_PROJECT_NAME $DOCKER_TAG_NAME
   after_script:
     - docker logout
   tags:

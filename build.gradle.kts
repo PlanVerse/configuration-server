@@ -68,7 +68,7 @@ jib {
     }
     container {
         jvmFlags = listOf(
-            "-Djasypt.encryptor.password=${System.getenv("CLOUD_ENC_PWD")}",
+            "-Djasypt.encryptor.password=\${JASYPT_ENCRYPTOR_PASSWORD}",
         )
         ports = listOf("50050")
     }
