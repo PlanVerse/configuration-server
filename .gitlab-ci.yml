@@ -1,4 +1,4 @@
-image: gradle:8.11.1-jdk17
+image: gradle:8.11.1-jdk17-alpine
 
 variables:
   GRADLE_USER_HOME: $CI_PROJECT_DIR/.gradle
@@ -21,6 +21,7 @@ build:
   only:
     - main
     - dev
+  interruptible: true
 
 deploy:
   stage: deploy
@@ -28,16 +29,14 @@ deploy:
     - job: build
   variables:
     DOCKER_LATEST_IMAGE_NAME: $CI_REGISTRY_IMAGE:latest
-    DOCKER_TAG_NAME: $CI_PROJECT_NAME:latest
   before_script:
     - docker login $CI_REGISTRY -u $TOKEN_USER --password $TOKEN_PWD
   script:
-    - docker rmi $DOCKER_LATEST_IMAGE_NAME;echo $?
     - docker pull $DOCKER_LATEST_IMAGE_NAME
-    - docker tag $DOCKER_LATEST_IMAGE_NAME $DOCKER_TAG_NAME
     - docker stop $CI_PROJECT_NAME;echo $?
     - docker rm -f $CONTAINER_NAME;echo $?
-    - docker run -d -p 50050:50050 -e JASYPT_ENCRYPTOR_PASSWORD=$CLOUD_ENC_PWD --restart=unless-stopped --name $CI_PROJECT_NAME $DOCKER_TAG_NAME
+    - docker run -d -p 50050:50050 -e JASYPT_ENCRYPTOR_PASSWORD=$CLOUD_ENC_PWD --restart=unless-stopped --name $CI_PROJECT_NAME $DOCKER_LATEST_IMAGE_NAME
+    - docker system prune -f
   after_script:
     - docker logout
   tags:
@@ -45,3 +44,4 @@ deploy:
   only:
     - main
     - dev
+  interruptible: true
