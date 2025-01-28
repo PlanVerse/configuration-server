@@ -34,7 +34,7 @@ deploy:
   script:
     - docker pull $DOCKER_LATEST_IMAGE_NAME
     - docker stop $CI_PROJECT_NAME;echo $?
-    - docker rm -f $CONTAINER_NAME;echo $?
+    - docker rm -f $CI_PROJECT_NAME;echo $?
     - docker run -d -p 50050:50050 -e JASYPT_ENCRYPTOR_PASSWORD=$CLOUD_ENC_PWD --restart=unless-stopped --name $CI_PROJECT_NAME $DOCKER_LATEST_IMAGE_NAME
     - docker system prune -f
   after_script:
