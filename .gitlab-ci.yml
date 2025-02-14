@@ -1,27 +1,29 @@
-image: gradle:8.11.1-jdk17-alpine
-
 variables:
   GRADLE_USER_HOME: $CI_PROJECT_DIR/.gradle
   JIB_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+
+default:
+  interruptible: true
 
 stages:
   - build
   - deploy
 
-cache:
-  key: $CI_COMMIT_REF_SLUG
-  paths:
-    - .gradle/wrapper/
-    - .gradle/caches/
-
 build:
   stage: build
+  cache:
+    key: ${CI_COMMIT_REF_NAME}
+    paths:
+      - build
+      - .gradle/wrapper
+      - .gradle/caches
+    policy: pull-push
   script:
-    - ./gradlew clean jib
-  only:
-    - main
-    - dev
-  interruptible: true
+    - echo "jib 실행"
+    - ./gradlew jib --no-daemon
+    - echo "jib 완료"
+  tags:
+    - macos
 
 deploy:
   stage: deploy
@@ -41,7 +43,4 @@ deploy:
     - docker logout
   tags:
     - winos
-  only:
-    - main
-    - dev
   interruptible: true
