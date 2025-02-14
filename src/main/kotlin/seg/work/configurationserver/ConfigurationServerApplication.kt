@@ -1,4 +1,4 @@
-package com.planverse.configurationserver
+package seg.work.configurationserver
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication

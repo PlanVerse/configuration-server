@@ -1,7 +1,6 @@
-package com.planverse.configurationserver
+package seg.work.configurationserver
 
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.context.SpringBootTest
 
 class ConfigurationServerApplicationTests {
 

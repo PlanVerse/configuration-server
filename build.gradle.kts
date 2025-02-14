@@ -12,7 +12,7 @@ plugins {
     id("com.google.cloud.tools.jib") version "3.4.4"
 }
 
-group = "com.planverse"
+group = "seg.work"
 version = "0.0.1-SNAPSHOT"
 
 java {
