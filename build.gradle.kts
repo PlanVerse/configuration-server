@@ -56,7 +56,7 @@ tasks.withType<Test> {
 
 jib {
     from {
-        image = "amazoncorretto:17"
+        image = "amazoncorretto:17-alpine-jdk"
     }
     to {
         image = System.getenv("JIB_IMAGE")
